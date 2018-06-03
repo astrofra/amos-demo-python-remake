@@ -399,6 +399,11 @@ def render_star():
 
 	scn = plus.NewScene()
 	plus.LoadScene(scn, "@assets/star.scn")
+
+	while not scn.IsReady():
+		dt = plus.UpdateClock()
+		plus.UpdateScene(scn, dt)
+
 	cam = plus.AddCamera(scn, hg.Matrix4.TranslationMatrix(hg.Vector3(0, -45, -100) * 1))
 	cam.GetTransform().SetRotation(hg.Vector3(math.pi * -24 / 180, 0, 0))
 	cam.GetCamera().SetZoomFactor(22.0) ## * 0.5)
