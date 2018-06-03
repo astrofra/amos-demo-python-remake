@@ -615,7 +615,7 @@ def render_change_fonts():
 	for _font in fonts:
 		strings = []
 		for i in range(_font[2]):
-			strinhg.append(["AMOS FONTS", (i + 1) * _font[1] / 3, 1, 0, _font[0], _font[1]])
+			strings.append(["AMOS FONTS", (i + 1) * _font[1] / 3, 1, 0, _font[0], _font[1]])
 
 		render_text_screen(strings, fade_duration=0.1, plus=plus, exit_callback=demo_exit_test)
 
@@ -920,19 +920,20 @@ def main():
 	startup_sequence()
 	if resolution_requester(open_gui=True):
 		engine_init()
-		render_title_page_bouncing()
-		play_music()
-		render_title_page_still()
-		render_credits()
-		render_title_page()
-		render_hardsprite()
-		render_hotdog_screen()
-		render_gipper()
-		render_gippers()
-		render_star()
-		render_hardscroll()
-		render_dual_playfield()
-		render_overlay()
+		if False:
+			render_title_page_bouncing()
+			play_music()
+			render_title_page_still()
+			render_credits()
+			render_title_page()
+			render_hardsprite()
+			render_hotdog_screen()
+			render_gipper()
+			render_gippers()
+			render_star()
+			render_hardscroll()
+			render_dual_playfield()
+			render_overlay()
 		render_change_fonts()
 		render_price()
 
