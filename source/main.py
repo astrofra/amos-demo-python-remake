@@ -12,9 +12,7 @@
 #                its called "IMPORTANT_TEXT_FILE.ASC".
 # ---------------------------------------------------------------------
 
-import harfang as gs
-# import gs.plus.render as render
-# import gs.plus.clock as clock
+import harfang as hg
 import math
 import sys
 import random
@@ -26,23 +24,28 @@ from screen_specs import *
 from os.path import dirname, realpath
 from random import uniform
 
-plus = None
-
 def resolution_requester(open_gui=True):
+	global plus
 	if open_gui:
-		window_mode = pymsgbox.confirm(text='Select your screen mode', title='AMOS DEMO', buttons=['Windowed', 'Fullscreen'])
+		try:
+			window_mode = pymsgbox.confirm(text='Select your screen mode', title='AMOS DEMO', buttons=['Windowed', 'Fullscreen'])
+		except:
+			window_mode = 'Windowed'
 
 		if window_mode == 'Windowed':
-			demo_screen_size[2] = gs.Window.Windowed
+			demo_screen_size[2] = hg.Windowed
 			screen_resolutions = ['640x480', '720x568', '800x600', '1280x800']
 		elif window_mode == 'Fullscreen':
-			demo_screen_size[2] = gs.Window.Fullscreen
+			demo_screen_size[2] = hg.Fullscreen
 			screen_resolutions = ['640x480', '800x600', '1280x720', '1280x800', '1920x1080']
 		else:
 			return False
 
-		screen_res = pymsgbox.confirm(text='Select your screen resolution', title='AMOS DEMO',
+		try:
+			screen_res = pymsgbox.confirm(text='Select your screen resolution', title='AMOS DEMO',
 									   buttons=screen_resolutions)
+		except:
+			screen_res = '640x480'
 
 		if screen_res is not None:
 			demo_screen_size[0] = int(screen_res.split('x')[0])
@@ -55,23 +58,20 @@ def resolution_requester(open_gui=True):
 
 def demo_exit_test():
 	global plus
-	if plus.IsAppEnded(plus.EndOnDefaultWindowClosed) or plus.KeyPress(gs.InputDevice.KeyEscape):
+	if plus.IsAppEnded(hg.AppEndOnDefaultWindowClosed) or plus.KeyPress(hg.KeyEscape):
 		plus.RenderUninit()
 		exit()
 
 
 def engine_init():
 	global al, channel, plus
-	try:
-		gs.LoadPlugins(gs.get_default_plugins_path())
-	except:
-		pass
+	hg.LoadPlugins()
 
-	plus = gs.GetPlus()
-	plus.RenderInit(demo_screen_size[0], demo_screen_size[1], 1, demo_screen_size[2])
+	plus = hg.GetPlus()
+	plus.RenderInit(demo_screen_size[0], demo_screen_size[1]) # , 1, demo_screen_size[2])
 
 	# mount the system file driver
-	gs.MountFileDriver(gs.StdFileDriver("assets/"), "@assets/")
+	hg.MountFileDriver(hg.StdFileDriver("assets/"), "@assets/")
 
 	al = None
 	channel = None
@@ -111,11 +111,9 @@ def startup_sequence():
 def play_music():
 	global al, channel, plus
 	# create an OpenAL mixer and wrap it with the MixerAsync interface
-	al = gs.MixerAsync(gs.ALMixer())
+	al = hg.CreateMixer()
 	al.Open()
-	future_channel = al.Stream("@assets/amos_demo_music.xm")
-	channel = future_channel.get()
-
+	channel = al.Stream("@assets/amos_demo_music.xm")
 
 def render_credits():
 	global plus
@@ -142,6 +140,7 @@ def render_credits():
 
 
 def render_title_page():
+	global plus
 	strings = [["Let your imagination",40,1,0, "bilko-opti-bold", 42],
 			["take control and",65,1,0, "bilko-opti-bold", 42],
 			["design the game",90,1,0, "bilko-opti-bold", 42],
@@ -182,12 +181,12 @@ def render_hardsprite():
 	total_duration = 10.0
 	while fx_timer < total_duration:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 
 		plus.Clear()
 
-		plus.SetBlend2D(gs.BlendAlpha)
+		plus.SetBlend2D(hg.BlendAlpha)
 
 		if fx_timer < intro_duration:
 			v_max_sprites = int(RangeAdjust(fx_timer, 0.0, intro_duration, 1, max_sprites))
@@ -219,7 +218,7 @@ def render_hardsprite():
 			plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5 + (sprite_data[spr_index]['x'] * zoom_size()),
 						(amiga_screen_size[1] - sprite_data[spr_index]['y']) * zoom_size(), zoom_size() / 2,
 						"@assets/" + spr_name + str(int(sprite_data[spr_index]['frame_index'])) + ".png")
-		plus.SetBlend2D(gs.BlendOpaque)
+		plus.SetBlend2D(hg.BlendOpaque)
 
 		plus.Flip()
 
@@ -248,13 +247,13 @@ def render_hotdog_screen():
 	fx_duration = 15.0
 	while fx_timer < fx_duration:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		plus.Clear()
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size() * 3) * 0.5, 0, zoom_size(), "@assets/backgr.png")
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5, 0, zoom_size(), "@assets/backgr.png")
 		plus.Image2D((demo_screen_size[0] + amiga_screen_size[0] * zoom_size()) * 0.5, 0, zoom_size(), "@assets/backgr.png")
-		plus.SetBlend2D(gs.BlendAlpha)
+		plus.SetBlend2D(hg.BlendAlpha)
 		for b in bobs:
 			plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5 + b[0] * zoom_size(),
 						   (amiga_screen_size[1] - b[1]) * zoom_size(), zoom_size(), "@assets/" + b[2] + ".tga")
@@ -265,7 +264,7 @@ def render_hotdog_screen():
 				if b[0] < -340:
 					b[0] = 440
 
-		plus.SetBlend2D(gs.BlendOpaque)
+		plus.SetBlend2D(hg.BlendOpaque)
 		plus.Flip()
 
 
@@ -283,13 +282,13 @@ def render_gipper():
 	brake_duration = 0.5
 	shoot_duration = 2.5
 	fx_duration = 7.0
-	plus.SetBlend2D(gs.BlendAlpha)
+	plus.SetBlend2D(hg.BlendAlpha)
 
 	x, y, sprite_index = -55, 75 + 48, 0
 
 	while fx_timer < fx_duration:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		plus.Clear()
 
@@ -314,7 +313,7 @@ def render_gipper():
 
 		plus.Flip()
 
-	plus.SetBlend2D(gs.BlendOpaque)
+	plus.SetBlend2D(hg.BlendOpaque)
 
 
 def render_gippers():
@@ -333,13 +332,13 @@ def render_gippers():
 	brake_duration = 0.5
 	shoot_duration = 2.5
 	fx_duration = 8.5
-	plus.SetBlend2D(gs.BlendAlpha)
+	plus.SetBlend2D(hg.BlendAlpha)
 
 	x, y, sprite_index = -55, 74 + 50, 0
 
 	while fx_timer < fx_duration:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		plus.Clear()
 
@@ -368,11 +367,11 @@ def render_gippers():
 
 		plus.Flip()
 
-	plus.SetBlend2D(gs.BlendOpaque)
+	plus.SetBlend2D(hg.BlendOpaque)
 
 
 def rvect(r):
-	return gs.Vector3(uniform(-r, r), uniform(-r, r), uniform(-r, r))
+	return hg.Vector3(uniform(-r, r), uniform(-r, r), uniform(-r, r))
 
 
 def render_star():
@@ -395,12 +394,12 @@ def render_star():
 	render_text_screen(strings, duration=5.0, plus=plus, exit_callback=demo_exit_test)
 
 	scn = plus.NewScene()
-	scn.Load("@assets/star.scn", gs.SceneLoadContext(plus.GetRenderSystem()))
-	cam = plus.AddCamera(scn, gs.Matrix4.TranslationMatrix(gs.Vector3(0, -45, -100) * 1))
-	cam.GetTransform().SetRotation(gs.Vector3(math.pi * -24 / 180, 0, 0))
-	cam.GetComponent("Camera").SetZoomFactor(22.0) ## * 0.5)
-	# plus.AddEnvironment(scn, gs.Color.Black, gs.Color.White)
-	plus.AddLight(scn, gs.Matrix4.TranslationMatrix((6, 4, -6)))
+	plus.LoadScene(scn, "@assets/star.scn")
+	cam = plus.AddCamera(scn, hg.Matrix4.TranslationMatrix(hg.Vector3(0, -45, -100) * 1))
+	cam.GetTransform().SetRotation(hg.Vector3(math.pi * -24 / 180, 0, 0))
+	cam.GetCamera().SetZoomFactor(22.0) ## * 0.5)
+	# plus.AddEnvironment(scn, hg.Color.Black, hg.Color.White)
+	plus.AddLight(scn, hg.Matrix4.TranslationMatrix(hg.Vector3(6, 4, -6)))
 
 	while not scn.IsReady():
 		dt = plus.UpdateClock()
@@ -408,72 +407,72 @@ def render_star():
 
 	_w = 15
 
-	pos = gs.Vector3(0, -_w * 0.75, 0)
-	rb = plus.AddPhysicCube(scn, gs.Matrix4.TranslationMatrix(pos), _w * 2, 1, 1, 0)
+	pos = hg.Vector3(0, -_w * 0.75, 0)
+	rb = plus.AddPhysicCube(scn, hg.Matrix4.TranslationMatrix(pos), _w * 2, 1, 1, 0)
 	rb[1].SetRestitution(1.0)
 
-	pos = gs.Vector3(0, _w * 0.75, 0)
-	rb = plus.AddPhysicCube(scn, gs.Matrix4.TranslationMatrix(pos), _w * 2, 1, 1, 0)
+	pos = hg.Vector3(0, _w * 0.75, 0)
+	rb = plus.AddPhysicCube(scn, hg.Matrix4.TranslationMatrix(pos), _w * 2, 1, 1, 0)
 	rb[1].SetRestitution(1.0)
 
-	pos = gs.Vector3(_w, 0, 0)
-	rb = plus.AddPhysicCube(scn, gs.Matrix4.TranslationMatrix(pos), 1, _w * 2, 1, 0)
+	pos = hg.Vector3(_w, 0, 0)
+	rb = plus.AddPhysicCube(scn, hg.Matrix4.TranslationMatrix(pos), 1, _w * 2, 1, 0)
 	rb[1].SetRestitution(1.0)
 
-	pos = gs.Vector3(-_w, 0, 0)
-	rb = plus.AddPhysicCube(scn, gs.Matrix4.TranslationMatrix(pos), 1, _w * 2, 1, 0)
+	pos = hg.Vector3(-_w, 0, 0)
+	rb = plus.AddPhysicCube(scn, hg.Matrix4.TranslationMatrix(pos), 1, _w * 2, 1, 0)
 	rb[1].SetRestitution(1.0)
 
 	_w = 8
 
-	scn.GetPhysicSystem().SetForceRigidBodyAxisLockOnCreation(gs.LockZ + gs.LockRotX + gs.LockRotY + gs.LockRotZ)
-	scn.GetPhysicSystem().SetGravity(gs.Vector3(0, 0, 0))
+	scn.GetPhysicSystem().SetForceRigidBodyAxisLockOnCreation(hg.AxisLockZ + hg.AxisLockRotX + hg.AxisLockRotY + hg.AxisLockRotZ)
+	scn.GetPhysicSystem().SetGravity(hg.Vector3(0, 0, 0))
 
 	balls = {}
 	prev_pos = None
 	for i in range(15):
 		_rnd = uniform(0, 1)
 		if _rnd < 0.25:
-			pos = gs.Vector3(-_w, -_w, 0)
+			pos = hg.Vector3(-_w, -_w, 0)
 		elif _rnd < 0.5:
-			pos = gs.Vector3(_w, -_w, 0)
+			pos = hg.Vector3(_w, -_w, 0)
 		elif _rnd< 0.75:
-			pos = gs.Vector3(_w, _w, 0)
+			pos = hg.Vector3(_w, _w, 0)
 		else:
-			pos = gs.Vector3(-_w, _w, 0)
+			pos = hg.Vector3(-_w, _w, 0)
 
-		while prev_pos is not None and gs.Vector3.Dist(prev_pos, pos) < 2.0:
+		while prev_pos is not None and hg.Dist(prev_pos, pos) < 2.0:
 			pos += rvect(2.0)
 			pos.z = 0
 
 		prev_pos = pos
 
-		ball = plus.AddPhysicSphere(scn, gs.Matrix4.TranslationMatrix(pos), 0.5, 6, 16, 1, "@assets/blue.mat")
+		ball = plus.AddPhysicSphere(scn, hg.Matrix4.TranslationMatrix(pos), 0.5, 6, 16, 1, "@assets/blue.mat")
 
 		ball[1].ApplyLinearImpulse(pos * -1.0 * uniform(0.05, 0.5))
 		ball[1].SetRestitution(1.1)
 
-		col_ball = plus.AddSphere(scn, gs.Matrix4.TranslationMatrix(gs.Vector3(0,0,0)), 0.5, 6, 16, "@assets/red.mat")
+		col_ball = plus.AddSphere(scn, hg.Matrix4.TranslationMatrix(hg.Vector3(0,0,0)), 0.5, 6, 16, "@assets/red.mat")
 		col_ball.GetTransform().SetParent(ball[0])
-		col_ball.GetComponent("Object").SetEnabled(False)
+		col_ball.GetObject().SetEnabled(False)
 
 		plus.UpdateScene(scn, plus.UpdateClock())
 		balls[str(ball[0].GetUid())] = [ball[0], col_ball, 0.0]
 
 	star_mesh_edges = scn.GetNode("star_mesh_edges")
-	star_mesh_edges.RemoveComponent(star_mesh_edges.GetComponent("Object"))
+	star_mesh_edges.RemoveComponent(star_mesh_edges.GetObject())
 
 	star = scn.GetNode("star_mesh")
-	rb = gs.MakeRigidBody()
+	rb = hg.RigidBody()
 	rb.SetRestitution(1.0)
 	star.AddComponent(rb)
-	star.RemoveComponent(star.GetComponent("Object"))
+	star.RemoveComponent(star.GetObject())
 
 	star_bitmap = scn.GetNode("star_bitmap")
-	star_bitmap.GetTransform().SetRotation(gs.Vector3(-0.15, 0, 0))
+	star_bitmap.GetTransform().SetRotation(hg.Vector3(-0.15, 0, 0))
 
-	star_geo = gs.LoadCoreGeometry("@assets/star_mesh.geo")
-	star_col = gs.MakeMeshCollision()
+	star_geo = hg.LoadGeometry("@assets/star_mesh.geo")
+	star_col = hg.MeshCollision()
 	star_col.SetGeometry(star_geo)
 	star_col.SetMass(10)
 	star.AddComponent(star_col)
@@ -486,7 +485,7 @@ def render_star():
 		demo_exit_test()
 		dt = plus.UpdateClock()
 		plus.UpdateScene(scn, dt)
-		fx_timer += dt.to_sec()
+		fx_timer += hg.time_to_sec_f(dt)
 
 		for colp in ps.GetCollisionPairs(star):
 			if colp.GetNodeA().GetName == "star_mesh":
@@ -499,14 +498,13 @@ def render_star():
 		for ball_key in balls:
 			ball = balls[ball_key]
 			if ball[2] > 0.0:
-				ball[1].GetComponent("Object").SetEnabled(True)
-				ball[0].GetComponent("Object").SetEnabled(False)
+				ball[1].GetObject().SetEnabled(True)
+				ball[0].GetObject().SetEnabled(False)
 			else:
-				ball[1].GetComponent("Object").SetEnabled(False)
-				ball[0].GetComponent("Object").SetEnabled(True)
+				ball[1].GetObject().SetEnabled(False)
+				ball[0].GetObject().SetEnabled(True)
 
-			ball[2] = max(0.0, ball[2] - dt.to_sec())
-
+			ball[2] = max(0.0, ball[2] - hg.time_to_sec_f(dt))
 
 		plus.Flip()
 
@@ -538,7 +536,7 @@ def render_overlay():
 
 	while fx_timer < fx_duration:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		plus.Clear()
 
@@ -568,7 +566,7 @@ def render_overlay():
 			screen_1[1] = -amiga_screen_size[1]
 
 		text_bg_y = (amiga_screen_size[1] - screen_2[1]) * zoom_size() - 3
-		text_bg_col = gs.Color(0.1, 0.1, 0.1, 1.0)
+		text_bg_col = hg.Color(0.1, 0.1, 0.1, 1.0)
 		plus.Quad2D(0, text_bg_y, 0, text_bg_y + 32, demo_screen_size[0], text_bg_y + 32, demo_screen_size[0], text_bg_y,
 					text_bg_col, text_bg_col, text_bg_col, text_bg_col)
 		plus.Commit2D()
@@ -607,7 +605,7 @@ def render_change_fonts():
 	for _font in fonts:
 		strings = []
 		for i in range(_font[2]):
-			strings.append(["AMOS FONTS", (i + 1) * _font[1] / 3, 1, 0, _font[0], _font[1]])
+			strinhg.append(["AMOS FONTS", (i + 1) * _font[1] / 3, 1, 0, _font[0], _font[1]])
 
 		render_text_screen(strings, fade_duration=0.1, plus=plus, exit_callback=demo_exit_test)
 
@@ -616,10 +614,10 @@ def render_price_mandarin_logo():
 	global plus
 
 	x, y = 114, 67
-	plus.SetBlend2D(gs.BlendAlpha)
+	plus.SetBlend2D(hg.BlendAlpha)
 	plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5 + x * zoom_size(),
 					(amiga_screen_size[1] - y) * zoom_size(), zoom_size() / 2.0, "@assets/mandarin_logo.png")
-	plus.SetBlend2D(gs.BlendOpaque)
+	plus.SetBlend2D(hg.BlendOpaque)
 
 
 def render_price():
@@ -686,7 +684,7 @@ def render_hardscroll():
 
 	while fx_timer < fx_duration:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 
 		if fx_timer < phase_1_duration:
@@ -741,7 +739,7 @@ def render_hardscroll():
 			sprite_1[4] = -1
 
 		plus.Clear()
-		plus.SetBlend2D(gs.BlendAlpha)
+		plus.SetBlend2D(hg.BlendAlpha)
 
 		# front image
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5 + (screen_1[0] - amiga_screen_size[0]) * zoom_size(),
@@ -790,7 +788,7 @@ def render_hardscroll():
 			plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5 + enemy_sprites[i][0] * zoom_size(),
 						(amiga_screen_size[1] - enemy_sprites[i][1]) * zoom_size(), zoom_size() / 2.0, "@assets/sprite_spaceship_" + str(int(enemy_sprites[i][4])) + ".png")
 
-		plus.SetBlend2D(gs.BlendOpaque)
+		plus.SetBlend2D(hg.BlendOpaque)
 		plus.Flip()
 
 
@@ -819,13 +817,11 @@ def render_dual_playfield():
 	screen_1 = [0, 200, -2]
 
 	while fx_timer < fx_duration:
-		global plus
-
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		plus.Clear()
-		plus.SetBlend2D(gs.BlendAlpha)
+		plus.SetBlend2D(hg.BlendAlpha)
 
 		# back image
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5 + (screen_0[0] - amiga_screen_size[0]) * zoom_size(),
@@ -863,7 +859,7 @@ def render_dual_playfield():
 		if screen_1[0] < -amiga_screen_size[0]:
 			screen_1[0] = 0
 
-		plus.SetBlend2D(gs.BlendOpaque)
+		plus.SetBlend2D(hg.BlendOpaque)
 		plus.Flip()
 
 
@@ -874,7 +870,7 @@ def render_title_page_bouncing():
 	fx_duration = math.pi
 	while fx_timer < 4.0:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		y_damping = RangeAdjust(fx_timer, 0.0, fx_duration, 1.0, 0.0)
 		y_damping = Clamp(y_damping, 0.0, 1.0)
@@ -891,7 +887,7 @@ def render_title_page_still():
 	fx_timer = 0.0
 	while fx_timer < 4.0:
 		demo_exit_test()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 		plus.Clear()
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5, 0, zoom_size(), "@assets/titlepage.png")
@@ -899,6 +895,7 @@ def render_title_page_still():
 
 
 def main():
+	global plus
 	if getattr(sys, 'frozen', False):
 	    # frozen
 	    dir_ = dirname(sys.executable)
@@ -925,5 +922,6 @@ def main():
 		render_change_fonts()
 		render_price()
 
+plug = None
 if __name__ == "__main__":
 	main()

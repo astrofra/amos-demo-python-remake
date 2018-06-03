@@ -1,6 +1,4 @@
-import gs
-import gs.plus.render as render
-import gs.plus.clock as clock
+import harfang as hg
 import json
 from utils import *
 from screen_specs import *
@@ -9,8 +7,8 @@ from screen_specs import *
 def wireframe_json_to_segment_list(filename=None):
 	segment_list = []
 
-	if filename is not None and gs.GetFilesystem().Exists(filename):
-		with open(gs.GetFilesystem().MapToAbsolute(filename), 'r') as fp:
+	if filename is not None and hg.GetFilesystem().Exists(filename):
+		with open(hg.GetFilesystem().MapToAbsolute(filename), 'r') as fp:
 			data = json.load(fp)
 
 		# print(data)
@@ -36,7 +34,7 @@ def wireframe_json_to_segment_list(filename=None):
 
 def get_sprite_seq_max_frame(filename_base, file_extension=".png"):
 	n = 0
-	while gs.GetFilesystem().Exists("@assets/" + filename_base + str(n) + file_extension):
+	while hg.GetFilesystem().Exists("@assets/" + filename_base + str(n) + file_extension):
 		n += 1
 
 	return n
@@ -53,12 +51,14 @@ def render_strings_array(strings = None, fade=1.0, fonts_dict={}, plus=None):
 	for line in strings:
 		font_key = line[4] + "_" + str(line[5])
 		if not font_key in fonts_dict:
-			fonts_dict[font_key] = gs.RasterFont("@assets/" + line[4] + ".ttf", int(line[5] * zoom_size() / 3), 512)
+			fonts_dict[font_key] = hg.RasterFont("@assets/" + line[4] + ".ttf", int(line[5] * zoom_size() / 3), 512)
 
 		rect = fonts_dict[font_key].GetTextRect(rsys, line[0])
 		x = (demo_screen_size[0] - rect.GetWidth()) * 0.5
 		y = (amiga_screen_size[1] - line[1]) * zoom_size()
-		fonts_dict[font_key].Write(rsys, line[0], gs.Vector3(x, y, 0.5), gs.Color.White * fade)
+		pos = hg.Matrix4()
+		pos.SetTranslation(hg.Vector3(x, y, 0.5))
+		fonts_dict[font_key].Write(rsys, line[0], pos, hg.Color.White * fade)
 
 		rsys.DrawRasterFontBatch()
 
@@ -71,7 +71,7 @@ def render_strings_array(strings = None, fade=1.0, fonts_dict={}, plus=None):
 			rect = fonts_dict[font_key].GetTextRect(rsys, line[0])
 			x = (demo_screen_size[0] - rect.GetWidth()) * 0.5
 			y = (amiga_screen_size[1] - line[1]) * zoom_size() - (line[5] * 0.2 * zoom_size() / 3)
-			render.line2d(x, y, x + rect.GetWidth(), y, gs.Color.White * fade * fade, gs.Color.White * fade * fade)
+			plus.Line2D(x, y, x + rect.GetWidth(), y, hg.Color.White * fade * fade, hg.Color.White * fade * fade)
 
 	return fonts_dict
 
@@ -89,7 +89,7 @@ def render_text_screen(strings=None, duration=4.0, fade_duration=1.0, render_cal
 	while fx_timer < duration:
 		if exit_callback is not None:
 			exit_callback()
-		dt_sec = clock.update()
+		dt_sec = hg.time_to_sec_f(plus.UpdateClock())
 		fx_timer += dt_sec
 
 		if fx_timer < fade_duration:
