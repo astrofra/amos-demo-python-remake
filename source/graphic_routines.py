@@ -106,3 +106,4 @@ def render_text_screen(strings=None, duration=4.0, fade_duration=1.0, render_cal
 			if render_callback is not None:
 				render_callback()
 		plus.Flip()
+		plus.EndFrame()

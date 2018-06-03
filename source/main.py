@@ -221,6 +221,7 @@ def render_hardsprite():
 		plus.SetBlend2D(hg.BlendOpaque)
 
 		plus.Flip()
+		plus.EndFrame()
 
 
 def render_hotdog_screen():
@@ -266,6 +267,7 @@ def render_hotdog_screen():
 
 		plus.SetBlend2D(hg.BlendOpaque)
 		plus.Flip()
+		plus.EndFrame()
 
 
 def render_gipper():
@@ -312,6 +314,7 @@ def render_gipper():
 					   (amiga_screen_size[1] - y) * zoom_size(), zoom_size() / 2.0, "@assets/sprite_gipper_" + str(int(sprite_index)) + ".png")
 
 		plus.Flip()
+		plus.EndFrame()
 
 	plus.SetBlend2D(hg.BlendOpaque)
 
@@ -366,6 +369,7 @@ def render_gippers():
 							   (amiga_screen_size[1] - yy) * zoom_size(), zoom_size() / 2.0, "@assets/sprite_gipper_" + str(int(sprite_index)) + ".png")
 
 		plus.Flip()
+		plus.EndFrame()
 
 	plus.SetBlend2D(hg.BlendOpaque)
 
@@ -507,7 +511,7 @@ def render_star():
 			ball[2] = max(0.0, ball[2] - hg.time_to_sec_f(dt))
 
 		plus.Flip()
-
+		plus.EndFrame()
 
 
 def render_overlay():
@@ -578,6 +582,7 @@ def render_overlay():
 			screen_2[1] = -amiga_screen_size[1] * 0.25
 
 		plus.Flip()
+		plus.EndFrame()
 
 
 def render_change_fonts():
@@ -790,6 +795,7 @@ def render_hardscroll():
 
 		plus.SetBlend2D(hg.BlendOpaque)
 		plus.Flip()
+		plus.EndFrame()
 
 
 def render_dual_playfield():
@@ -861,6 +867,7 @@ def render_dual_playfield():
 
 		plus.SetBlend2D(hg.BlendOpaque)
 		plus.Flip()
+		plus.EndFrame()
 
 
 def render_title_page_bouncing():
@@ -879,6 +886,7 @@ def render_title_page_bouncing():
 		plus.Clear()
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5, y_scr * demo_screen_size[1], zoom_size(), "@assets/titlepage.png")
 		plus.Flip()
+		plus.EndFrame()
 
 
 def render_title_page_still():
@@ -892,6 +900,7 @@ def render_title_page_still():
 		plus.Clear()
 		plus.Image2D((demo_screen_size[0] - amiga_screen_size[0] * zoom_size()) * 0.5, 0, zoom_size(), "@assets/titlepage.png")
 		plus.Flip()
+		plus.EndFrame()
 
 
 def main():
