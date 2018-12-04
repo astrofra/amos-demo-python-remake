@@ -40,7 +40,7 @@ def get_sprite_seq_max_frame(filename_base, file_extension=".png"):
 	return n
 
 
-def render_strings_array(strings = None, fade=1.0, fonts_dict={}, plus=None):
+def render_strings_array(strings=None, fade=1.0, fonts_dict={}, plus=None):
 	if plus is None:
 		return
 
@@ -50,17 +50,13 @@ def render_strings_array(strings = None, fade=1.0, fonts_dict={}, plus=None):
 
 	for line in strings:
 		font_key = line[4] + "_" + str(line[5])
-		if not font_key in fonts_dict:
+		if not (font_key in fonts_dict):
 			fonts_dict[font_key] = hg.RasterFont("@assets/" + line[4] + ".ttf", int(line[5] * zoom_size() / 3), 512)
 
 		rect = fonts_dict[font_key].GetTextRect(rsys, line[0])
 		x = (demo_screen_size[0] - rect.GetWidth()) * 0.5
 		y = (amiga_screen_size[1] - line[1]) * zoom_size()
-		pos = hg.Matrix4()
-		pos.SetTranslation(hg.Vector3(x, y, 0.5))
-		fonts_dict[font_key].Write(rsys, line[0], pos, hg.Color.White * fade)
-
-		rsys.DrawRasterFontBatch()
+		plus.Text2D(x, y, line[0], int(line[5] * zoom_size() / 3), hg.Color.White * fade, "@assets/" + line[4] + ".ttf")
 
 	plus.GetRenderer().EnableBlending(False)
 
