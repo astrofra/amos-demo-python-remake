@@ -16,8 +16,6 @@ import harfang as hg
 import math
 import sys
 import random
-import pymsgbox
-import json
 from utils import *
 from graphic_routines import *
 from screen_specs import *
@@ -25,34 +23,35 @@ from os.path import dirname, realpath
 from random import uniform
 
 def resolution_requester(open_gui=True):
-	global plus
-	if open_gui:
-		try:
-			window_mode = pymsgbox.confirm(text='Select your screen mode', title='AMOS DEMO', buttons=['Windowed', 'Fullscreen'])
-		except:
-			window_mode = 'Windowed'
-
-		if window_mode == 'Windowed':
-			demo_screen_size[2] = hg.Windowed
-			screen_resolutions = ['640x480', '720x568', '800x600', '1280x800']
-		elif window_mode == 'Fullscreen':
-			demo_screen_size[2] = hg.Fullscreen
-			screen_resolutions = ['640x480', '800x600', '1280x720', '1280x800', '1920x1080']
-		else:
-			return False
-
-		try:
-			screen_res = pymsgbox.confirm(text='Select your screen resolution', title='AMOS DEMO',
-									   buttons=screen_resolutions)
-		except:
-			screen_res = '640x480'
-
-		if screen_res is not None:
-			demo_screen_size[0] = int(screen_res.split('x')[0])
-			demo_screen_size[1] = int(screen_res.split('x')[1])
-		else:
-			return False
-
+	window_mode = 'Windowed'
+	# global plus
+	# if open_gui:
+	# 	try:
+	# 		window_mode = pymsgbox.confirm(text='Select your screen mode', title='AMOS DEMO', buttons=['Windowed', 'Fullscreen'])
+	# 	except:
+	# 		window_mode = 'Windowed'
+	#
+	# 	if window_mode == 'Windowed':
+	# 		demo_screen_size[2] = hg.Windowed
+	# 		screen_resolutions = ['640x480', '720x568', '800x600', '1280x800']
+	# 	elif window_mode == 'Fullscreen':
+	# 		demo_screen_size[2] = hg.Fullscreen
+	# 		screen_resolutions = ['640x480', '800x600', '1280x720', '1280x800', '1920x1080']
+	# 	else:
+	# 		return False
+	#
+	# 	try:
+	# 		screen_res = pymsgbox.confirm(text='Select your screen resolution', title='AMOS DEMO',
+	# 								   buttons=screen_resolutions)
+	# 	except:
+	# 		screen_res = '640x480'
+	#
+	# 	if screen_res is not None:
+	# 		demo_screen_size[0] = int(screen_res.split('x')[0])
+	# 		demo_screen_size[1] = int(screen_res.split('x')[1])
+	# 	else:
+	# 		return False
+	#
 	return True
 
 
@@ -480,7 +479,8 @@ def render_star():
 	star_bitmap = scn.GetNode("star_bitmap")
 	star_bitmap.GetTransform().SetRotation(hg.Vector3(-0.15, 0, 0))
 
-	star_geo = hg.LoadGeometry("@assets/star_mesh.geo")
+	star_geo = hg.Geometry()
+	hg.LoadGeometry(star_geo, "@assets/star_mesh.geo")
 	star_col = hg.MeshCollision()
 	star_col.SetGeometry(star_geo)
 	star_col.SetMass(10)
@@ -502,7 +502,9 @@ def render_star():
 			else:
 				col_node = colp.GetNodeA()
 
-			balls[str(col_node.GetUid())][2] = 1.0
+			_key = str(col_node.GetUid())
+			if _key in balls:
+				balls[_key][2] = 1.0
 
 		for ball_key in balls:
 			ball = balls[ball_key]
