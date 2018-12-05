@@ -5,10 +5,10 @@ from cx_Freeze import setup, Executable
 # Gather extra runtime dependencies.
 def gather_extra_redist():
 	import os
-	import gs
+	import harfang
 	import inspect
 
-	path = os.path.dirname(inspect.getfile(gs))
+	path = os.path.dirname(inspect.getfile(harfang))
 	files = os.listdir(path)
 
 	out = []
@@ -25,8 +25,8 @@ extra_redist = gather_extra_redist()
 # Dependencies are automatically detected, but it might need fine tuning.
 options = {
 	'build_exe': {
-		'compressed': True,
-		'packages': ['gs'],
+		# 'compressed': True,
+		'packages': ['harfang'],
 		'include_files': ['file_id.diz', 'screenshot.png', 'openal32.dll', 'assets/'] + extra_redist # 'ad_coupon_AF_issue_06.jpg', 
 	}
 }
@@ -35,4 +35,4 @@ setup(  name = "AMOS Demo",
 		version = "1.0",
 		description = "PC version of the original AMOS demo released in 1989 by Mandarin Software.",
 		options = options,
-		executables = [Executable("main.py", targetName="AMOD-Demo.exe", icon="icon.ico")])
+		executables = [Executable("main.py", targetName="AMOS-Demo.exe", icon="icon.ico")])

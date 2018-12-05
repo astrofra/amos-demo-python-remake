@@ -8,10 +8,13 @@ rmdir build\*.* /s /f /q
 rmdir build\ /s /q
 mkdir build
 
-c:\Python34\Python.exe setup.py build
+set TCL_LIBRARY=C:\Users\fra\AppData\Local\Programs\Python\Python37\tcl\tcl8.6
+set TK_LIBRARY=C:\Users\fra\AppData\Local\Programs\Python\Python37\tcl\tk8.6
+
+Python.exe setup.py build
 
 cd build
-rename exe.win-amd64-3.4 AMOS-Demo(Win64)
+rename exe.win-amd64-3.7 AMOS-Demo(Win64)
 cd "AMOS-Demo(Win64)"
 
 del openvr_api.dll
